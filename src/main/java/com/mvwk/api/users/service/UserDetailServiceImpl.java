@@ -3,6 +3,8 @@ package com.mvwk.api.users.service;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,15 +18,23 @@ import com.mvwk.api.users.dao.UserDAO;
 import com.mvwk.api.users.domain.UserVO;
 import com.mvwk.api.users.util.UserRole;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {
+	
+	Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	@Autowired
 	private UserDAO userDao;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		UserVO userVo = userDao.findUser(username);
+		log.info("## loadUserByUsername ##");
+		
+		UserVO userVo = userDao.getUser(username);
 		
         User currentUser = null;
         if (userVo != null) {
@@ -33,7 +43,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
             grantedAuthorities.add(new SimpleGrantedAuthority(
             		userVo.isUserAdmin() ? UserRole.ADMIN.getValue() : UserRole.MEMBER.getValue()));
-            System.out.println(userVo.getUserId());
             currentUser = new User(userVo.getUserId(), userVo.getUserPw(), grantedAuthorities);
         }
 

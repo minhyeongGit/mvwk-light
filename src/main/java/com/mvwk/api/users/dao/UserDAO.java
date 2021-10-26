@@ -8,6 +8,8 @@ import com.mvwk.api.users.domain.UserVO;
 @Mapper
 public interface UserDAO {
 	
-	UserVO findUser(@Param("userId") String userId);
 	
+	UserVO getUser(@Param("USER_ID") String userId);
+	
+	void createUser(UserVO userVO);
 }

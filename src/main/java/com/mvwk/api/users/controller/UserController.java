@@ -11,9 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mvwk.api.users.dao.UserDAO;
+import com.mvwk.api.users.domain.UserVO;
+import com.mvwk.api.users.service.UserService;
 
 @Controller
 public class UserController {
@@ -23,16 +26,35 @@ public class UserController {
 	private PasswordEncoder passwordEncoder;
 	
 	@Autowired
+	private UserService userService;
+	
+	@Autowired
 	private UserDAO userDAO;
 	
+	// 초기화면 페이지
 	@GetMapping("/")
-	public String mainPage() {
+	public String indexPage() {
 		return "/index";
 	}
 
+	// 로그인 페이지 이동
+	@GetMapping("/login")
+	public String loginGet() {
+		return "/login";
+	}
+	
+	// 회원가입 페이지 이동
 	@GetMapping("/join")
 	public String joinPage() {
 		return "/join";
+	}
+	
+	// 회원가입 -> 패스워드 암호화 및 DB 인서트
+	@PostMapping("/join")
+	public String createUser(UserVO userVO) {
+		userVO.setUserPw(passwordEncoder.encode(userVO.getUserPw()));
+		userService.createUser(userVO);
+		return "redirect:/login";
 	}
 	
     // 로그인 성공시 이동할 페이지
@@ -49,9 +71,16 @@ public class UserController {
                 nextPage = "redirect:/admin/admin_index";
             } else {
                 model.put("currentUserId", currentUser.getUsername());
-                nextPage = "redirect:/index";
+                nextPage = "redirect:/main";
             }
         }
         return nextPage;
     }
+    
+    @GetMapping("/main")
+    public String mainPage() {
+    	return "redirect:/main";
+    }
+    
+    
 }
